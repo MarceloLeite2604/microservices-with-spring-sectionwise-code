@@ -4,7 +4,11 @@ services:
 
   configserver:
     image: eazybytes/configserver:latest
-    mem_limit: 700m
+    restart: on-failure
+    deploy:
+      resources:
+        limits:
+          memory: 700m
     ports:
       - "8071:8071"
     networks:
@@ -12,7 +16,7 @@ services:
    
   eurekaserver:
     image: eazybytes/eurekaserver:latest
-    mem_limit: 700m
+    restart: on-failure
     ports:
       - "8070:8070"
     networks:
@@ -20,9 +24,12 @@ services:
     depends_on:
       - configserver
     deploy:
+      resources:
+        limits:
+          memory: 700m
       restart_policy:
         condition: on-failure
-        delay: 15s
+        delay: 5s
         max_attempts: 3
         window: 120s
     environment:
@@ -31,7 +38,7 @@ services:
       
   accounts:
     image: eazybytes/accounts:latest
-    mem_limit: 700m
+    restart: on-failure
     ports:
       - "8080:8080"
     networks:
@@ -40,9 +47,36 @@ services:
       - configserver
       - eurekaserver
     deploy:
+      resources:
+        limits:
+          memory: 700m
       restart_policy:
         condition: on-failure
-        delay: 30s
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    environment:
+      SPRING_PROFILES_ACTIVE: default
+      SPRING_CONFIG_IMPORT: configserver:http://configserver:8071/
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8070/eureka/
+
+  accounts1:
+    image: eazybytes/accounts:latest
+    restart: on-failure
+    ports:
+      - "8081:8080"
+    networks:
+      - eazybank
+    depends_on:
+      - configserver
+      - eurekaserver
+    deploy:
+      resources:
+        limits:
+          memory: 700m
+      restart_policy:
+        condition: on-failure
+        delay: 5s
         max_attempts: 3
         window: 120s
     environment:
@@ -52,7 +86,7 @@ services:
   
   loans:
     image: eazybytes/loans:latest
-    mem_limit: 700m
+    restart: on-failure
     ports:
       - "8090:8090"
     networks:
@@ -61,9 +95,12 @@ services:
       - configserver
       - eurekaserver
     deploy:
+      resources:
+        limits:
+          memory: 700m
       restart_policy:
         condition: on-failure
-        delay: 30s
+        delay: 5s
         max_attempts: 3
         window: 120s
     environment:
@@ -73,7 +110,7 @@ services:
     
   cards:
     image: eazybytes/cards:latest
-    mem_limit: 700m
+    restart: on-failure
     ports:
       - "9000:9000"
     networks:
@@ -82,9 +119,12 @@ services:
       - configserver
       - eurekaserver
     deploy:
+      resources:
+        limits:
+          memory: 700m
       restart_policy:
         condition: on-failure
-        delay: 30s
+        delay: 5s
         max_attempts: 3
         window: 120s
     environment:
